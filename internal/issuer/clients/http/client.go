@@ -3,25 +3,23 @@ package http
 import (
 	"bytes"
 	"context"
-	"crypto/tls"
 	"fmt"
 	"io"
 	"net/http"
-	"time"
 
 	"github.com/dana-team/cert-external-issuer/internal/issuer/jsonutil"
-
 	"github.com/go-logr/logr"
+
 	"github.com/pkg/errors"
 )
 
 // Client is the interface to interact with HTTP
 type Client interface {
-	SendRequest(ctx context.Context, method string, url string, body string, headers map[string][]string, skipTLSVerify bool, timeout time.Duration) (resp Response, err error)
+	SendRequest(ctx context.Context, logger logr.Logger, method string, url string, body []byte, headers map[string][]string) (resp Response, err error)
 }
 
 type client struct {
-	log logr.Logger
+	HTTPClient http.Client
 }
 
 // Response represents an HTTP response.
@@ -40,9 +38,8 @@ type Request struct {
 }
 
 // SendRequest sends an HTTP request and returns the response.
-func (c *client) SendRequest(ctx context.Context, method string, url string, body string, headers map[string][]string, skipTLSVerify bool, timeout time.Duration) (Response, error) {
-	requestBody := []byte(body)
-	request, err := http.NewRequestWithContext(ctx, method, url, bytes.NewBuffer(requestBody))
+func (c *client) SendRequest(ctx context.Context, logger logr.Logger, method string, url string, body []byte, headers map[string][]string) (Response, error) {
+	request, err := http.NewRequestWithContext(ctx, method, url, bytes.NewBuffer(body))
 
 	if err != nil {
 		return Response{}, err
@@ -54,16 +51,8 @@ func (c *client) SendRequest(ctx context.Context, method string, url string, bod
 		}
 	}
 
-	hclient := &http.Client{
-		Transport: &http.Transport{
-			// #nosec G402
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: skipTLSVerify},
-		},
-		Timeout: timeout,
-	}
-
-	response, err := hclient.Do(request)
-	c.log.Info(fmt.Sprint("http request sent: ", jsonutil.ToJSON(Request{URL: url, Body: body, Method: method})))
+	response, err := c.HTTPClient.Do(request)
+	logger.Info(fmt.Sprint("http request sent: ", jsonutil.ToJSON(Request{URL: url, Body: string(body), Method: method})))
 
 	if err != nil {
 		return Response{}, fmt.Errorf("http request to %q failed: %v", url, err)
@@ -75,7 +64,7 @@ func (c *client) SendRequest(ctx context.Context, method string, url string, bod
 	}
 
 	if response.StatusCode != http.StatusOK {
-		c.log.Info(fmt.Sprintf("request failed, method: %v, status code: %v, body: %v", method, response.StatusCode, responseBody))
+		logger.Info(fmt.Sprintf("request failed, method: %v, status code: %v, body: %v", method, response.StatusCode, responseBody))
 		return Response{}, errors.New(http.StatusText(response.StatusCode))
 	}
 
@@ -93,9 +82,9 @@ func (c *client) SendRequest(ctx context.Context, method string, url string, bod
 	return beautifiedResponse, nil
 }
 
-// NewClient returns a new Http Client
-func NewClient(log logr.Logger) Client {
+// NewClient returns a new HTTP Client.
+func NewClient(hClient http.Client) Client {
 	return &client{
-		log: log,
+		HTTPClient: hClient,
 	}
 }

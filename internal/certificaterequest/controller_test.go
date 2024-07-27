@@ -60,8 +60,8 @@ type fakeSigner struct {
 	errSign error
 }
 
-func (o *fakeSigner) Sign(context.Context, []byte) ([]byte, []byte, error) {
-	return []byte("fake signed certificate"), []byte("fake ca chain"), o.errSign
+func (o *fakeSigner) Sign(context.Context, logr.Logger, []byte) ([]byte, []byte, error) {
+	return []byte("fake signed certificate"), []byte("fake ca"), o.errSign
 }
 
 type args struct {
@@ -135,7 +135,7 @@ func TestReconcile(t *testing.T) {
 					},
 				},
 				},
-				signerBuilder: func(logr.Logger, *certv1alpha1.IssuerSpec, map[string][]byte, kube.Client) (signer.Signer, error) {
+				signerBuilder: func(*certv1alpha1.IssuerSpec, map[string][]byte, kube.Client) (signer.Signer, error) {
 					return &fakeSigner{}, nil
 				},
 			},
@@ -193,7 +193,7 @@ func TestReconcile(t *testing.T) {
 					},
 				},
 				},
-				signerBuilder: func(logr.Logger, *certv1alpha1.IssuerSpec, map[string][]byte, kube.Client) (signer.Signer, error) {
+				signerBuilder: func(*certv1alpha1.IssuerSpec, map[string][]byte, kube.Client) (signer.Signer, error) {
 					return &fakeSigner{}, nil
 				},
 				clusterResourceNamespace: kubeSystemNS,
@@ -501,7 +501,7 @@ func TestReconcile(t *testing.T) {
 						},
 					},
 				},
-				signerBuilder: func(logr.Logger, *certv1alpha1.IssuerSpec, map[string][]byte, kube.Client) (signer.Signer, error) {
+				signerBuilder: func(*certv1alpha1.IssuerSpec, map[string][]byte, kube.Client) (signer.Signer, error) {
 					return nil, errors.New("simulated signer builder error")
 				},
 			},
@@ -560,7 +560,7 @@ func TestReconcile(t *testing.T) {
 						},
 					},
 				},
-				signerBuilder: func(logr.Logger, *certv1alpha1.IssuerSpec, map[string][]byte, kube.Client) (signer.Signer, error) {
+				signerBuilder: func(*certv1alpha1.IssuerSpec, map[string][]byte, kube.Client) (signer.Signer, error) {
 					return &fakeSigner{errSign: errors.New("simulated sign error")}, nil
 				},
 			},
@@ -615,7 +615,7 @@ func TestReconcile(t *testing.T) {
 						},
 					},
 				},
-				signerBuilder: func(logr.Logger, *certv1alpha1.IssuerSpec, map[string][]byte, kube.Client) (signer.Signer, error) {
+				signerBuilder: func(*certv1alpha1.IssuerSpec, map[string][]byte, kube.Client) (signer.Signer, error) {
 					return &fakeSigner{}, nil
 				},
 			},
@@ -673,7 +673,7 @@ func TestReconcile(t *testing.T) {
 						},
 					},
 				},
-				signerBuilder: func(logr.Logger, *certv1alpha1.IssuerSpec, map[string][]byte, kube.Client) (signer.Signer, error) {
+				signerBuilder: func(*certv1alpha1.IssuerSpec, map[string][]byte, kube.Client) (signer.Signer, error) {
 					return &fakeSigner{}, nil
 				},
 			},

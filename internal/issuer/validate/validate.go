@@ -47,6 +47,10 @@ func EnsureCSR(csr *x509.CertificateRequest, restrictions certv1alpha1.Restricti
 
 // validateKey validates the key type and size specified in the CSR against the private key restrictions.
 func validateKey(csr *x509.CertificateRequest, privateKeyRestrictions certv1alpha1.PrivateKeyRestrictions) error {
+	if len(privateKeyRestrictions.AllowedPrivateKeyAlgorithms) == 0 {
+		return nil
+	}
+
 	allowedAlgorithms := convertPrivateKeyAlgorithm(privateKeyRestrictions.AllowedPrivateKeyAlgorithms)
 
 	if err := validateKeyType(csr, allowedAlgorithms); err != nil {
@@ -83,36 +87,52 @@ func validateSubjectAltName(csr *x509.CertificateRequest, subjectAltNamesRestric
 
 // validateSubject validates the subject of the given certificate request against the subject restrictions.
 func validateSubject(csr *x509.CertificateRequest, subjectRestrictions certv1alpha1.SubjectRestrictions) error {
-	if err := validateOrganizations(csr.Subject.Organization, subjectRestrictions.AllowedOrganizations); err != nil {
-		return fmt.Errorf(errValidationFailedMsg, "organization", err)
+	if len(subjectRestrictions.AllowedOrganizations) > 0 {
+		if err := validateOrganizations(csr.Subject.Organization, subjectRestrictions.AllowedOrganizations); err != nil {
+			return fmt.Errorf(errValidationFailedMsg, "organization", err)
+		}
 	}
 
-	if err := validateCountries(csr.Subject.Country, subjectRestrictions.AllowedCountries); err != nil {
-		return fmt.Errorf(errValidationFailedMsg, "country", err)
+	if len(subjectRestrictions.AllowedCountries) > 0 {
+		if err := validateCountries(csr.Subject.Country, subjectRestrictions.AllowedCountries); err != nil {
+			return fmt.Errorf(errValidationFailedMsg, "country", err)
+		}
 	}
 
-	if err := validateOrganizationalUnits(csr.Subject.OrganizationalUnit, subjectRestrictions.AllowedOrganizationalUnits); err != nil {
-		return fmt.Errorf(errValidationFailedMsg, "organizational unit", err)
+	if len(subjectRestrictions.AllowedOrganizationalUnits) > 0 {
+		if err := validateOrganizationalUnits(csr.Subject.OrganizationalUnit, subjectRestrictions.AllowedOrganizationalUnits); err != nil {
+			return fmt.Errorf(errValidationFailedMsg, "organizational unit", err)
+		}
 	}
 
-	if err := validateLocalities(csr.Subject.Locality, subjectRestrictions.AllowedLocalities); err != nil {
-		return fmt.Errorf(errValidationFailedMsg, "locality", err)
+	if len(subjectRestrictions.AllowedLocalities) > 0 {
+		if err := validateLocalities(csr.Subject.Locality, subjectRestrictions.AllowedLocalities); err != nil {
+			return fmt.Errorf(errValidationFailedMsg, "locality", err)
+		}
 	}
 
-	if err := validateProvinces(csr.Subject.Province, subjectRestrictions.AllowedProvinces); err != nil {
-		return fmt.Errorf(errValidationFailedMsg, "province", err)
+	if len(subjectRestrictions.AllowedProvinces) > 0 {
+		if err := validateProvinces(csr.Subject.Province, subjectRestrictions.AllowedProvinces); err != nil {
+			return fmt.Errorf(errValidationFailedMsg, "province", err)
+		}
 	}
 
-	if err := validateStreetAddresses(csr.Subject.StreetAddress, subjectRestrictions.AllowedStreetAddresses); err != nil {
-		return fmt.Errorf(errValidationFailedMsg, "street address", err)
+	if len(subjectRestrictions.AllowedStreetAddresses) > 0 {
+		if err := validateStreetAddresses(csr.Subject.StreetAddress, subjectRestrictions.AllowedStreetAddresses); err != nil {
+			return fmt.Errorf(errValidationFailedMsg, "street address", err)
+		}
 	}
 
-	if err := validatePostalCodes(csr.Subject.PostalCode, subjectRestrictions.AllowedPostalCodes); err != nil {
-		return fmt.Errorf(errValidationFailedMsg, "postal code", err)
+	if len(subjectRestrictions.AllowedPostalCodes) > 0 {
+		if err := validatePostalCodes(csr.Subject.PostalCode, subjectRestrictions.AllowedPostalCodes); err != nil {
+			return fmt.Errorf(errValidationFailedMsg, "postal code", err)
+		}
 	}
 
-	if err := validateSerialNumbers(csr.Subject.SerialNumber, subjectRestrictions.AllowedSerialNumbers); err != nil {
-		return fmt.Errorf(errValidationFailedMsg, "serial number", err)
+	if len(subjectRestrictions.AllowedSerialNumbers) > 0 {
+		if err := validateSerialNumbers(csr.Subject.SerialNumber, subjectRestrictions.AllowedSerialNumbers); err != nil {
+			return fmt.Errorf(errValidationFailedMsg, "serial number", err)
+		}
 	}
 
 	return nil
@@ -120,6 +140,10 @@ func validateSubject(csr *x509.CertificateRequest, subjectRestrictions certv1alp
 
 // validateUsages validates the key usages specified in the CSR against the usage restrictions.
 func validateUsages(csr *x509.CertificateRequest, usageRestrictions certv1alpha1.UsageRestrictions) error {
+	if len(usageRestrictions.AllowedUsages) == 0 {
+		return nil
+	}
+
 	allowedUsages := convertKeyUsage(usageRestrictions.AllowedUsages)
 
 	for _, ext := range csr.Extensions {

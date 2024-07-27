@@ -81,7 +81,13 @@ metadata:
 spec:
   apiEndpoint: "https://test.com"
   authSecretName: "cert-secret"
-  waitTimeout: "5s"
+  httpConfig:
+    skipVerifyTLS: true
+    waitTimeout: "5s"
+    retryBackoff:
+      duration: "5s"
+      steps: 10
+  form: "chain"
   certificateRestrictions:
     privateKeyRestrictions:
       allowedPrivateKeyAlgorithms:
@@ -127,8 +133,46 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: cert-secret
-  namespace: cert-external-issuer-system
+  namespace: default
 type: Opaque
 data:
   token: <base64>
+```
+
+#### Certificate Example
+
+```yaml
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: cert
+  namespace: default
+spec:
+  secretName: cert-tls
+
+  privateKey:
+    algorithm: RSA
+    encoding: PKCS1
+    size: 4096
+
+  duration: 2160h # 90d
+  renewBefore: 360h # 15d
+
+  isCA: false
+  usages:
+    - server auth
+
+  subject:
+    organizations:
+      - dana-team
+  commonName: cert.com
+
+  dnsNames:
+    - cert.com
+    - www.cert.com
+
+  issuerRef:
+    name: clusterissuer-sample
+    kind: ClusterIssuer
+    group: cert.dana.io
 ```

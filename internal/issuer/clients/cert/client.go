@@ -1,7 +1,8 @@
 package cert
 
 import (
-	"time"
+	"context"
+	"net/http"
 
 	httpClient "github.com/dana-team/cert-external-issuer/internal/issuer/clients/http"
 	"github.com/dana-team/certificate-operator/api/v1alpha1"
@@ -12,20 +13,24 @@ type ClientBuilder func(logr.Logger, *v1alpha1.CertificateConfig, map[string][]b
 
 // Client is the interface to interact with Cert API service.
 type Client interface {
+	// PostCertificate sends a POST request to cert to create a new certificate and returns the GUID.
+	PostCertificate(ctx context.Context, log logr.Logger, csrBytes []byte) (string, error)
+
+	// DownloadCertificate downloads a certificate from the Cert API.
+	DownloadCertificate(ctx context.Context, log logr.Logger, guid string) (DownloadCertificateResponse, error)
 }
 
 type client struct {
 	localHttpClient  httpClient.Client
-	timeout          time.Duration
 	apiEndpoint      string
 	downloadEndpoint string
+	form             string
 	token            string
 }
 
 // NewClient returns a new client.
-func NewClient(log logr.Logger, options ...func(*client)) Client {
+func NewClient(options ...func(*client)) Client {
 	cl := &client{}
-	cl.localHttpClient = httpClient.NewClient(log)
 	for _, o := range options {
 		o(cl)
 	}
@@ -54,9 +59,16 @@ func WithToken(token string) func(*client) {
 	}
 }
 
-// WithTimeout returns a client with the Timeout field populated.
-func WithTimeout(timeout time.Duration) func(*client) {
+// WithHTTPClient returns a client with the API Endpoint field populated.
+func WithHTTPClient(hClient http.Client) func(*client) {
 	return func(c *client) {
-		c.timeout = timeout
+		c.localHttpClient = httpClient.NewClient(hClient)
+	}
+}
+
+// WithForm returns a client with the Form field populated.
+func WithForm(form string) func(*client) {
+	return func(c *client) {
+		c.form = form
 	}
 }

@@ -26,6 +26,14 @@ type IssuerSpec struct {
 	// APIEndpoint is the base URL for the endpoint of the Cert API service.
 	APIEndpoint string `json:"apiEndpoint"`
 
+	// APIEndpoint is the download URL for the endpoint of the Cert API service.
+	DownloadEndpoint string `json:"downloadEndpoint"`
+
+	// Form is the format of the Certificate that is downloaded from the Cert API service.
+	// +kubebuilder:default:="chain"
+	// +kubebuilder:validation:Enum=chain;public
+	Form string `json:"form,omitempty"`
+
 	// AuthSecretName is a reference to a Secret in the same namespace as the referent. If the
 	// referent is a ClusterIssuer, the reference instead refers to the resource
 	// with the given name in the configured 'cluster resource namespace', which
@@ -33,11 +41,44 @@ type IssuerSpec struct {
 	// namespace that the controller runs in).
 	AuthSecretName string `json:"authSecretName"`
 
-	// WaitTimeout specifies the maximum time duration for waiting for response from cert.
-	WaitTimeout *metav1.Duration `json:"waitTimeout,omitempty"`
+	// HTTPConfig specifies configuration relating to the HTTP client used to interact
+	// with the cert API.
+	HTTPConfig HTTPConfig `json:"httpConfig"`
 
 	// CertificateRestrictions is a set of restrictions for a Certificate imposed by the Issuer.
 	CertificateRestrictions Restrictions `json:"certificateRestrictions,omitempty"`
+}
+
+type HTTPConfig struct {
+	// SkipVerifyTLS specifies whether to skip TLS verification in HTTP requests.
+	SkipVerifyTLS bool `json:"skipVerifyTLS"`
+
+	// WaitTimeout specifies the maximum time duration for waiting for response in HTTP requests.
+	WaitTimeout *metav1.Duration `json:"waitTimeout,omitempty"`
+
+	// RetryBackoff specifies the retry configuration in HTTP requests.
+	RetryBackoff RetryBackoff `json:"retryBackoff,omitempty"`
+}
+
+// RetryBackoff specifies the retry configuration in HTTP requests.
+// It is the wait.Backoff but with json tags.
+type RetryBackoff struct {
+	// Duration is the initial duration.
+	Duration metav1.Duration `json:"duration,omitempty"`
+
+	// Factor multiplies duration in each iteration, if factor is not zero
+	// and the limits imposed by Steps. Should not be negative.
+	Factor string `json:"factor,omitempty"`
+
+	// Jitter contributes to the sleep at each iteration. It is
+	// the duration plus an additional amount chosen uniformly at
+	// random from the interval between zero and `jitter*duration`.
+	Jitter string `json:"jitter,omitempty"`
+
+	// Steps is the remaining number of iterations in which the duration
+	// parameter may change. If not positive, the duration is not
+	// changed. Used for exponential backoff in combination with Factor.
+	Steps int `json:"steps,omitempty"`
 }
 
 // Restrictions defines a set of restrictions for a Certificate imposed by the Issuer.

@@ -4,9 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"net/http"
-	"strings"
-	"time"
 
 	cmutil "github.com/cert-manager/cert-manager/pkg/api/util"
 	cmmeta "github.com/cert-manager/cert-manager/pkg/apis/meta/v1"
@@ -33,7 +30,6 @@ import (
 
 const (
 	eventReasonCertificateRequestReconciler = "CertificateRequestReconciler"
-	requeueAfterNotFoundError               = time.Second * 5
 )
 
 var (
@@ -130,22 +126,18 @@ func (r *CertificateRequestReconciler) Reconcile(ctx context.Context, req ctrl.R
 		return ctrl.Result{}, fmt.Errorf("%w, secret name: %s, reason: %v", errGetAuthSecret, issuerSpec.AuthSecretName, err)
 	}
 
-	signer, err := r.SignerBuilder(logger, issuerSpec, secret.Data, r.Client)
+	signer, err := r.SignerBuilder(issuerSpec, secret.Data, r.Client)
 	if err != nil {
 		return ctrl.Result{}, fmt.Errorf("%w: %v", errSignerBuilder, err)
 	}
 
-	leaf, chain, err := signer.Sign(ctx, certificateRequest.Spec.Request)
+	leaf, ca, err := signer.Sign(ctx, logger, certificateRequest.Spec.Request)
 	if err != nil {
-		if strings.Contains(err.Error(), http.StatusText(http.StatusNotFound)) {
-			return ctrl.Result{RequeueAfter: requeueAfterNotFoundError}, err
-		}
-
 		return ctrl.Result{}, fmt.Errorf("%w: %v", errSignerSign, err)
 	}
 
 	certificateRequest.Status.Certificate = leaf
-	certificateRequest.Status.CA = chain
+	certificateRequest.Status.CA = ca
 	r.report(logger, &certificateRequest, cmapi.CertificateRequestReasonIssued, "Signed", nil)
 
 	return ctrl.Result{}, nil

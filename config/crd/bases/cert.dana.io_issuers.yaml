@@ -247,13 +247,64 @@ spec:
                         type: array
                     type: object
                 type: object
-              waitTimeout:
-                description: WaitTimeout specifies the maximum time duration for waiting
-                  for response from cert.
+              downloadEndpoint:
+                description: APIEndpoint is the download URL for the endpoint of the
+                  Cert API service.
                 type: string
+              form:
+                default: chain
+                description: Form is the format of the Certificate that is downloaded
+                  from the Cert API service.
+                enum:
+                - chain
+                - public
+                type: string
+              httpConfig:
+                description: |-
+                  HTTPConfig specifies configuration relating to the HTTP client used to interact
+                  with the cert API.
+                properties:
+                  retryBackoff:
+                    description: RetryBackoff specifies the retry configuration in
+                      HTTP requests.
+                    properties:
+                      duration:
+                        description: Duration is the initial duration.
+                        type: string
+                      factor:
+                        description: |-
+                          Factor multiplies duration in each iteration, if factor is not zero
+                          and the limits imposed by Steps. Should not be negative.
+                        type: string
+                      jitter:
+                        description: |-
+                          Jitter contributes to the sleep at each iteration. It is
+                          the duration plus an additional amount chosen uniformly at
+                          random from the interval between zero and `jitter*duration`.
+                        type: string
+                      steps:
+                        description: |-
+                          Steps is the remaining number of iterations in which the duration
+                          parameter may change. If not positive, the duration is not
+                          changed. Used for exponential backoff in combination with Factor.
+                        type: integer
+                    type: object
+                  skipVerifyTLS:
+                    description: SkipVerifyTLS specifies whether to skip TLS verification
+                      in HTTP requests.
+                    type: boolean
+                  waitTimeout:
+                    description: WaitTimeout specifies the maximum time duration for
+                      waiting for response in HTTP requests.
+                    type: string
+                required:
+                - skipVerifyTLS
+                type: object
             required:
             - apiEndpoint
             - authSecretName
+            - downloadEndpoint
+            - httpConfig
             type: object
           status:
             description: IssuerStatus defines the observed state of Issuer

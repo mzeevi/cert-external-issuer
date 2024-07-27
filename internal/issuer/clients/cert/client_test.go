@@ -1,11 +1,11 @@
 package cert
 
 import (
+	"net/http"
 	"testing"
-	"time"
 
 	"github.com/crossplane/crossplane-runtime/pkg/test"
-	"github.com/go-logr/logr"
+	httpClient "github.com/dana-team/cert-external-issuer/internal/issuer/clients/http"
 	"github.com/google/go-cmp/cmp"
 )
 
@@ -13,14 +13,18 @@ var (
 	testAPIEndpoint      = "https://api.endpoint"
 	testDownloadEndpoint = "https://download.endpoint"
 	testToken            = "dummy-token"
-	testTimeout          = 2 * time.Minute
+	testForm             = "form"
+
+	hClient        = http.Client{}
+	testHTTPClient = httpClient.NewClient(hClient)
 )
 
 const (
 	withAPIEndpoint      = "WithAPIEndpoint"
 	withDownloadEndpoint = "WithDownloadEndpoint"
+	withForm             = "WithForm"
 	withToken            = "WithToken"
-	withTimeout          = "WithTimeout"
+	withHTTPClient       = "WithHTTPClient"
 )
 
 func TestClientOptions(t *testing.T) {
@@ -63,20 +67,29 @@ func TestClientOptions(t *testing.T) {
 				value: testToken,
 			},
 		},
-		"ShouldCreateSuccessfullyWithTimeout": {
+		"ShouldCreateSuccessfullyWithHTTPClient": {
 			args: args{
-				name:   withTimeout,
-				option: WithTimeout(testTimeout),
+				name:   withHTTPClient,
+				option: WithHTTPClient(http.Client{}),
 			},
 			want: want{
-				value: testTimeout,
+				value: testHTTPClient,
+			},
+		},
+		"ShouldCreateSuccessfullyWithForm": {
+			args: args{
+				name:   withForm,
+				option: WithForm(testForm),
+			},
+			want: want{
+				value: testForm,
 			},
 		},
 	}
 
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
-			cl := NewClient(logr.Logger{}, tc.args.option)
+			cl := NewClient(tc.args.option)
 			switch tc.args.name {
 			case withAPIEndpoint:
 				if diff := cmp.Diff(tc.want.value, cl.(*client).apiEndpoint, test.EquateErrors()); diff != "" {
@@ -90,12 +103,11 @@ func TestClientOptions(t *testing.T) {
 				if diff := cmp.Diff(tc.want.value, cl.(*client).token, test.EquateErrors()); diff != "" {
 					t.Fatalf("createClient(...): -want error, +got error: %v", diff)
 				}
-			case withTimeout:
-				if diff := cmp.Diff(tc.want.value, cl.(*client).timeout, test.EquateErrors()); diff != "" {
+			case withHTTPClient:
+				if diff := cmp.Diff(tc.want.value, cl.(*client).localHttpClient, test.EquateErrors()); diff != "" {
 					t.Fatalf("createClient(...): -want error, +got error: %v", diff)
 				}
 			}
-
 		})
 	}
 }
