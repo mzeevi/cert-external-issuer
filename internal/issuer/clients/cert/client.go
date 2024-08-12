@@ -5,11 +5,8 @@ import (
 	"net/http"
 
 	httpClient "github.com/dana-team/cert-external-issuer/internal/issuer/clients/http"
-	"github.com/dana-team/certificate-operator/api/v1alpha1"
 	"github.com/go-logr/logr"
 )
-
-type ClientBuilder func(logr.Logger, *v1alpha1.CertificateConfig, map[string][]byte) (Client, error)
 
 // Client is the interface to interact with Cert API service.
 type Client interface {
