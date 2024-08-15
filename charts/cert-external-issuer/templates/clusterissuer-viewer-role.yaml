@@ -1,11 +1,9 @@
-# permissions for end users to view clusterissuers.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
+  name: {{ include "cert-external-issuer.fullname" . }}-clusterissuer-viewer-role
   labels:
-    app.kubernetes.io/name: cert-external-issuer
-    app.kubernetes.io/managed-by: kustomize
-  name: clusterissuer-viewer-role
+  {{- include "cert-external-issuer.labels" . | nindent 4 }}
 rules:
 - apiGroups:
   - cert.dana.io

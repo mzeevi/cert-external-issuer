@@ -1,0 +1,76 @@
+{{ if .Values.approver.issuerEnabled }}
+apiVersion: cert.dana.io/v1alpha1
+kind: Issuer
+metadata:
+  name: {{ include "cert-external-issuer.fullname" . }}-issuer
+  namespace: {{ .Values.issuer.namespace }}
+spec:
+  downloadEndpoint: {{ .Values.issuer.downloadEndpoint }}
+  apiEndpoint: {{ .Values.issuer.apiEndpoint }}
+  authSecretName: {{ .Values.issuerSecret.name }}
+  httpConfig:
+    skipVerifyTLS: {{ .Values.issuer.httpConfig.skipVerifyTLS }}
+    waitTimeout: {{ .Values.issuer.httpConfig.waitTimeout }}
+    retryBackoff:
+      duration: {{ .Values.issuer.httpConfig.retryBackoff.duration }}
+      steps: {{ .Values.issuer.httpConfig.retryBackoff.steps }}
+  form: {{ .Values.issuer.form }}
+  certificateRestrictions:
+    privateKeyRestrictions:
+      allowedPrivateKeyAlgorithms:
+      {{- range .Values.issuer.certificateRestrictions.privateKeyRestrictions.allowedPrivateKeyAlgorithms }}
+      - {{ . }}
+      {{- end }}
+      allowedPrivateKeySizes:
+      {{- range .Values.issuer.certificateRestrictions.privateKeyRestrictions.allowedPrivateKeySizes }}
+      - {{ . }}
+      {{- end }}
+    subjectRestrictions:
+      allowedOrganizations:
+      {{- range .Values.issuer.certificateRestrictions.subjectRestrictions.allowedOrganizations }}
+      - {{ . }}
+      {{- end }}
+      allowedCountries:
+      {{- range .Values.issuer.certificateRestrictions.subjectRestrictions.allowedCountries }}
+      - {{ . }}
+      {{- end }}
+      allowedOrganizationalUnits:
+      {{- range .Values.issuer.certificateRestrictions.subjectRestrictions.allowedOrganizationalUnits }}
+      - {{ . }}
+      {{- end }}
+      allowedProvinces:
+      {{- range .Values.issuer.certificateRestrictions.subjectRestrictions.allowedProvinces }}
+      - {{ . }}
+      {{- end }}
+      allowedStreetAddresses:
+      {{- range .Values.issuer.certificateRestrictions.subjectRestrictions.allowedStreetAddresses }}
+      - {{ . }}
+      {{- end }}
+      allowedPostalCodes:
+      {{- range .Values.issuer.certificateRestrictions.subjectRestrictions.allowedPostalCodes }}
+      - {{ . }}
+      {{- end }}
+      allowedSerialNumbers:
+      {{- range .Values.issuer.certificateRestrictions.subjectRestrictions.allowedSerialNumbers }}
+      - {{ . }}
+      {{- end }}
+    usageRestrictions:
+      allowedUsages:
+      {{- range .Values.issuer.certificateRestrictions.usageRestrictions.allowedUsages }}
+      - {{ . }}
+      {{- end }}
+    domainRestrictions:
+      allowedDomains:
+      {{- range .Values.issuer.certificateRestrictions.domainRestrictions.allowedDomains }}
+      - {{ . }}
+      {{- end }}
+      allowedSubdomains:
+      {{- range .Values.issuer.certificateRestrictions.domainRestrictions.allowedSubdomains }}
+      - {{ . }}
+      {{- end }}
+    subjectAltNamesRestrictions:
+      allowDNSNames: {{ .Values.issuer.certificateRestrictions.subjectAltNamesRestrictions.allowDnsNames }}
+      allowIPAddresses: {{ .Values.issuer.certificateRestrictions.subjectAltNamesRestrictions.allowIPAddresses }}
+      allowAllowedURISANs: {{ .Values.issuer.certificateRestrictions.subjectAltNamesRestrictions.allowAllowedURISANs }}
+      allowAllowedEmailSANs: {{ .Values.issuer.certificateRestrictions.subjectAltNamesRestrictions.allowAllowedEmailSANs }}
+  {{ end }}

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "cert-external-issuer.fullname" . }}-metrics-service
+  labels:
+    control-plane: controller-manager
+  {{- include "cert-external-issuer.labels" . | nindent 4 }}
+spec:
+  ports:
+    - name: https
+      port: {{ .Values.service.httpsPort }}
+      protocol: {{ .Values.service.protocol }}
+      targetPort: {{ .Values.service.targetPort }}
+  selector:
+    control-plane: controller-manager

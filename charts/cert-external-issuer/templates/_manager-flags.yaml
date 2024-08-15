@@ -1,0 +1,9 @@
+{{- define "cert-external-issuer.managerFlags" }}
+   - --leader-elect
+   - --health-probe-bind-address={{ .Values.manager.options.healthProbeBindAddress }}
+   - --metrics-bind-address={{ .Values.manager.options.metricsBindAddress }}
+   - --cluster-resource-namespace={{ .Values.issuerSecret.namespace }}
+   - --version={{ .Values.manager.options.version }}
+   - --disable-approved-check={{ .Values.manager.options.disableApprovedCheck }}
+   - --ecs-logging={{ .Values.manager.options.ecsLogging }}
+{{- end }}
