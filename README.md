@@ -11,14 +11,13 @@ To better understand the code structure and the design decisions behind it, refe
 1. A Kubernetes cluster (KinD can be used for this purpose).
 2. `cert-manager` installed on the cluster (follow the [official installation guide](https://cert-manager.io/docs/installation/)).
 
-### Deploying the Controller
+### Install with Helm
 
-You can deploy the controller either from source or by applying the `install.yaml` available on the `releases` page.
+The chart directory is `charts/cert-external-issuer`.
 
-To deploy from source:
 
 ```bash
-$ make deploy IMG=ghcr.io/dana-team/cert-external-issuer:<release>
+$ helm upgrade --install cert-external-issuer --namespace cert-external-issuer-system --create-namespace oci://ghcr.io/dana-team/helm-charts/cert-external-issuer --version <release>
 ```
 
 #### Build your own image
@@ -79,6 +78,7 @@ kind: ClusterIssuer
 metadata:
   name: clusterissuer-sample
 spec:
+  downloadEndpoint: "https://test.com"
   apiEndpoint: "https://test.com"
   authSecretName: "cert-secret"
   httpConfig:

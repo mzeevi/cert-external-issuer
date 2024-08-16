@@ -1,0 +1,16 @@
+{{ if .Values.approver.rbacEnabled }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cert-manager-controller-approve:cert-dana-io
+rules:
+  - apiGroups:
+      - cert-manager.io
+    resources:
+      - signers
+    verbs:
+      - approve
+    resourceNames:
+      - issuers.cert.dana.io/*
+      - clusterissuers.cert.dana.io/*
+{{ end }}
