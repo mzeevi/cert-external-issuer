@@ -13,7 +13,7 @@ require (
 	github.com/onsi/gomega v1.34.1
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.9.0
-	go.elastic.co/ecszap v1.0.2
+	go.elastic.co/ecszap v1.0.3
 	go.uber.org/zap v1.27.0
 	k8s.io/api v0.30.3
 	k8s.io/apimachinery v0.30.3
