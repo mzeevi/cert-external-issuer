@@ -7,7 +7,7 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: leader-election-role
+  name: {{ include "cert-external-issuer.fullname" . }}-leader-election-role
 subjects:
   - kind: ServiceAccount
     name: {{ include "cert-external-issuer.fullname" . }}-controller-manager
