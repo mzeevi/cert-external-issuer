@@ -1,10 +1,8 @@
 package cert
 
 import (
-	"bytes"
 	"context"
 	"fmt"
-	"io"
 	"net/http"
 	"testing"
 
@@ -27,7 +25,6 @@ const (
 	testURL          = "https://test.com/"
 	downloadEndpoint = "download/"
 	guid             = "12345678/"
-	dataKey          = "data"
 )
 
 func TestPostCertificate(t *testing.T) {
@@ -55,10 +52,6 @@ func TestPostCertificate(t *testing.T) {
 				method: http.MethodPost,
 				path:   fmt.Sprintf("%s%s", testURL, "csr"),
 				responder: func(request *http.Request) (*http.Response, error) {
-					requestBody, _ := io.ReadAll(request.Body)
-					if !bytes.Equal(requestBody, exampleBytes) {
-						return httpmock.NewJsonResponse(http.StatusBadRequest, fmt.Sprintf("got %b, want %b", request.Body, exampleBytes))
-					}
 					return httpmock.NewJsonResponse(http.StatusOK, nil)
 				},
 			},

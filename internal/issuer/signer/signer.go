@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/dana-team/cert-external-issuer/internal/issuer/validate"
+
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/util/retry"
 
