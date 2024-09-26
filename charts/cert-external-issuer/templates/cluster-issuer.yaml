@@ -2,7 +2,7 @@
 apiVersion: cert.dana.io/v1alpha1
 kind: ClusterIssuer
 metadata:
-  name: {{ include "cert-external-issuer.fullname" . }}-clusterissuer
+  name: {{ .Values.issuer.name }}
 spec:
   downloadEndpoint: {{ .Values.issuer.downloadEndpoint }}
   apiEndpoint: {{ .Values.issuer.apiEndpoint }}

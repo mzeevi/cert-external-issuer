@@ -154,6 +154,7 @@ issuerSecret:
 
 # -- Configuration for the issuers.
 issuer:
+  name: cert-issuer
   namespace: default
   downloadEndpoint: "https://test.com"
   apiEndpoint: "https://test.com"
